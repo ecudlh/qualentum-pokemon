@@ -3,10 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Pokémon App</title>
     <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
 <body>
+    <header>
+        <div class="container">
+            <h1 style="margin:0 0 .75rem 0;">Pokémon</h1>
+            <!-- Barra de búsqueda -->
+            <form id="search-form" class="searchbar" role="search" aria-label="Buscar Pokémon">
+                <label for="search-input" class="visually-hidden">Buscar por nombre o ID</label>
+                <input id="search-input" name="q" type="search" placeholder="Busca por nombre o ID (p. ej. pikachu o 25)" autocomplete="off" />
+                <button id="search-button" type="submit">Buscar</button>
+            </form>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="layout">
+            <!-- Panel de detalles del Pokémon buscado/seleccionado -->
+            <section id="pokemon-detail" class="card" aria-live="polite" aria-busy="false">
+                <h2 style="margin-top:0">Detalle</h2>
+                <div id="detail-content">
+                    <p>Busca un Pokémon o selecciona uno de la lista.</p>
+                </div>
+            </section>
+
+            <!-- Listado + paginación -->
+            <section aria-labelledby="list-heading">
+                <div class="card">
+                    <h2 id="list-heading" style="margin-top:0">Listado</h2>
+                    <div id="pokemon-list" class="grid" aria-live="polite" aria-busy="false"></div>
+                    <nav class="pagination" aria-label="Paginación">
+                        <button id="prev-page" type="button" disabled>Anterior</button>
+                        <output id="page-info" for="prev-page next-page">Página <span id="current-page">1</span></output>
+                        <button id="next-page" type="button">Siguiente</button>
+                    </nav>
+                </div>
+            </section>
+        </div>
+    </main>
+
+
+    <!-- Templates opcionales para clonar desde JS -->
+    <template id="pokemon-item-template">
+        <article class="pokemon-item card" tabindex="0">
+            <img alt="Sprite del Pokémon" />
+            <h3 class="pokemon-name"></h3>
+        </article>
+    </template>
+
+    <template id="pokemon-detail-template">
+        <div class="detail">
+            <div style="display:flex; gap:1rem; align-items:center;">
+                <img id="detail-image" alt="Sprite del Pokémon" width="160" height="160" />
+                <div>
+                    <h3 id="detail-name" style="margin:.25rem 0"></h3>
+                    <p id="detail-id"></p>
+                    <p><strong>Tipos:</strong> <span id="detail-types"></span></p>
+                    <p><strong>Habilidades:</strong> <span id="detail-abilities"></span></p>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <script type="module" src="./assets/js/main.js"></script>
 </body>
 </html>
