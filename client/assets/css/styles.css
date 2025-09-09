@@ -85,6 +85,7 @@ h1 {
 .pokemon-item {
   text-align: center;
   padding: 0.5rem;
+  cursor: pointer;
 }
 
 .pokemon-item img {
