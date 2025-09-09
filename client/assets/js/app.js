@@ -1,7 +1,21 @@
+// Global var
+let limit = 10;       
+let offset = 0;       
+let currentPage = 1; 
+
+// DOM
+const prevButton = document.getElementById('prev-page');
+const nextButton = document.getElementById('next-page');
+const currentPageEl = document.getElementById('current-page');
+
+const searchForm = document.getElementById('search-form');
+const searchInput = document.getElementById('search-input');
+const detailContainer = document.getElementById('detail-content');
+
 // Petición para listado de pokemons
 async function fetchPokemonList() {
     try {
-        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=10&offset=0');
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
 
         if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
@@ -15,6 +29,11 @@ async function fetchPokemonList() {
 
         // Pintar listado
         displayPokemonList(pokemonDetails);
+
+        // Manejar paginación
+        prevButton.disabled = offset === 0;
+        nextButton.disabled = !data.next; 
+        currentPageEl.textContent = currentPage;
 
     } catch (error) {
         console.error("Hubo un problema al obtener la lista de Pokémon:", error);
@@ -47,20 +66,22 @@ function displayPokemonList(pokemonList) {
     }
 
     pokemonList.forEach(pokemon => {
-        const pokemonCard = `
-            <div class="pokemon-item">
-                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" />
-                <h3>${pokemon.name}</h3>
-            </div>
+        const pokemonCard = document.createElement("div");
+        pokemonCard.classList.add("pokemon-item");
+
+        pokemonCard.innerHTML = `
+            <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" />
+            <h3>${pokemon.name}</h3>
         `;
-        listContainer.innerHTML += pokemonCard;
+
+        // Poner evento en cada card para que se muestre el detalle
+        pokemonCard.addEventListener("click", () => {
+            displayPokemonDetail(pokemon);
+        });
+
+        listContainer.appendChild(pokemonCard);
     });
 }
-
-
-
-
-
 
 // Función para buscar pokemon
 async function fetchPokemonDetail(nameOrId) {
@@ -75,10 +96,7 @@ async function fetchPokemonDetail(nameOrId) {
     }
 }
 
-const searchForm = document.getElementById('search-form');
-const searchInput = document.getElementById('search-input');
-const detailContainer = document.getElementById('detail-content');
-
+// Pintar detalle de pokemon
 function displayPokemonDetail(pokemon) {
     detailContainer.innerHTML = ""; 
 
@@ -96,7 +114,7 @@ function displayPokemonDetail(pokemon) {
     const abilities = pokemon.abilities.slice(0, 3).map(a => a.ability.name).join(', ');
 
     detailContainer.innerHTML = `
-        <div class="pokemon-item">
+        <div class="pokemon-item-detail">
             <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" />
             <h3>${pokemon.name}</h3>
             <p><strong>Tipos:</strong> ${types}</p>
@@ -105,26 +123,49 @@ function displayPokemonDetail(pokemon) {
     `;
 }
 
-// Escuchar el evento submit del formulario
-searchForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); 
+// INIT
+function init() {
+    fetchPokemonList();
+    events()
+}
 
-    const inputText = searchInput.value.toLowerCase().trim(); 
-
-    if (!inputText) {
-        detailContainer.innerHTML = `<p class="error">Introduce un nombre o ID de Pokémon.</p>`;
-        return;
-    }
-
-    // Petición para obtener los datos del pokemon según el texto que haya buscado el usuario
-    const pokemon = await fetchPokemonDetail(inputText);
+// Events
+function events() {
+    // Escuchar el evento submit del formulario
+    searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); 
     
-    // Pintar detalle de pokemon
-    displayPokemonDetail(pokemon);
+        const inputText = searchInput.value.toLowerCase().trim(); 
+    
+        if (!inputText) {
+            detailContainer.innerHTML = `<p class="error">Introduce un nombre o ID de Pokémon.</p>`;
+            return;
+        }
+    
+        // Petición para obtener los datos del pokemon según el texto que haya buscado el usuario
+        const pokemon = await fetchPokemonDetail(inputText);
+        
+        // Pintar detalle de pokemon
+        displayPokemonDetail(pokemon);
+    
+        // Limpiar texto del input de búsqueda
+        searchInput.value = "";
+    });
+    
+    // Eventos paginación
+    prevButton.addEventListener('click', () => {
+        if (offset > 0) {
+            offset -= limit;
+            currentPage--;
+            fetchPokemonList();
+        }
+    });
+    
+    nextButton.addEventListener('click', () => {
+        offset += limit;
+        currentPage++;
+        fetchPokemonList();
+    });
+}
 
-    // Limpiar texto del input de búsqueda
-    searchInput.value = "";
-});
-
-
-fetchPokemonList();
+window.addEventListener("DOMContentLoaded", init);
